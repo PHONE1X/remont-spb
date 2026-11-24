@@ -406,5 +406,15 @@ ym(114639802, "init", {clickmap:true, trackLinks:true, accurateTrackBounce:true,
 </script>
 <noscript><div><img src="https://mc.yandex.ru/watch/114639802" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
 <!-- /Yandex.Metrika counter -->
+<script>
+// цели Метрики: звонок и отправка формы
+document.addEventListener("click", function (e) {
+  var a = e.target.closest ? e.target.closest('a[href^="tel:"]') : null;
+  if (a && window.ym) ym(114639802, "reachGoal", "phone_click");
+}, true);
+document.addEventListener("submit", function (e) {
+  if (window.ym) ym(114639802, "reachGoal", "lead_form");
+}, true);
+</script>
 </body>
 </html>
