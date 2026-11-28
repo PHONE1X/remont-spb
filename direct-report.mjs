@@ -32,12 +32,22 @@ try {
   const bal = (t.match(/beslanovich-void ([\d\s]+,\d\d) ₽/) || [])[1] || "?";
   const i = t.indexOf("№ 7");
   const row = t.slice(i, i + 400);
-  const m = row.match(/(Приостановлена|На модерации|Идут показы|Остановлена|Показы начнутся[^П]*?)\s*[\d\s]+,\d\d ₽ в неделю.*?Поиск ([\d\s]+,\d\d) (\d[\d\s]*?) (\d+) (\d+)/);
+  const after = row.split(/Поиск\s+/)[1] || "";
+  const toks = after.split(/\s+/);
+  let m = null;
+  if (/^\d[\d]*,\d\d$/.test(toks[0] || "") || /^\d+,\d\d$/.test(toks[0] || "")) {
+    const ints = [];
+    for (let k = 1; k < toks.length && /^\d+$/.test(toks[k]); k++) ints.push(toks[k]);
+    if (ints.length >= 3) {
+      const conv = ints.pop(), clicks = ints.pop();
+      m = [null, null, toks[0], ints.join(""), clicks, conv];
+    }
+  }
   const status = (row.match(/(Показы начнутся по расписанию[^П]*?|Идут показы|На модерации|Приостановлена|Остановлена|Отклонена)/) || [])[1] || "?";
   let msg = `📊 Директ · ремонт СПб\nСтатус: ${status.trim()}\nБаланс: ${bal} ₽`;
   if (m) {
     const spend = parseFloat(m[2].replace(/\s/g, "").replace(",", "."));
-    const shows = m[3].replace(/\s/g, ""), clicks = parseInt(m[4]), conv = m[5];
+    const shows = m[3], clicks = parseInt(m[4]), conv = m[5];
     msg += `\nРасход: ${spend.toFixed(0)} ₽ · показы ${shows} · клики ${clicks}` + (clicks ? ` · клик ≈ ${(spend / clicks).toFixed(0)} ₽` : "");
     msg += `\nКонверсии Директа: ${conv}`;
     if (clicks >= 100 && !+conv && leadsToday() === 0) msg += `\n⚠️ 100+ кликов без заявок: останавливаем и разбираем запросы`;
